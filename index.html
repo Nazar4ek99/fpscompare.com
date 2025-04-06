@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPS Прогноз та Порівняння</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00ffcc;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background-color: #1e1e2f;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
+        }
+        label, select, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        select, button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+        }
+        select {
+            background-color: #2e2e40;
+            color: #fff;
+        }
+        button {
+            background-color: #00ffcc;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.02);
+            background-color: #00ddb3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #2a2a40;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px #00ffcc;
+        }
+        .language-switcher {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .language-switcher button {
+            width: auto;
+            margin-left: 10px;
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+        .tip {
+            margin-top: 10px;
+            font-style: italic;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-switcher">
+            <button onclick="setLanguage('uk')">🇺🇦</button>
+            <button onclick="setLanguage('en')">🇬🇧</button>
+            <button onclick="setLanguage('pl')">🇵🇱</button>
+        </div>
+
+        <h1 id="title">🔍 FPS Прогноз та Порівняння</h1>
+
+        <label id="label-cpu" for="cpu">Процесор:</label>
+        <select id="cpu">
+            <option value="i9-12900K">Intel Core i9-12900K</option>
+            <option value="i7-12700K">Intel Core i7-12700K</option>
+            <option value="i5-12600K">Intel Core i5-12600K</option>
+            <option value="i3-12100F">Intel Core i3-12100F</option>
+        </select>
+
+        <label id="label-gpu" for="gpu">Відеокарта:</label>
+        <select id="gpu">
+            <option value="GTX-1650">NVIDIA GTX 1650</option>
+            <option value="RTX-3060">NVIDIA RTX 3060</option>
+            <option value="RTX-3080">NVIDIA RTX 3080</option>
+            <option value="RTX-4090">NVIDIA RTX 4090</option>
+        </select>
+
+        <label id="label-game" for="game">Гра:</label>
+        <select id="game">
+            <option value="Fortnite">Fortnite</option>
+            <option value="CS2">Counter-Strike 2</option>
+            <option value="GTA5">GTA V</option>
+        </select>
+
+        <label id="label-quality" for="quality">Якість графіки:</label>
+        <select id="quality">
+            <option value="1080p">1080p</option>
+            <option value="2K">2K</option>
+            <option value="4K">4K</option>
+        </select>
+
+        <button onclick="compareComponents()" id="compare-button">🎮 Показати FPS</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const tips = {
+            uk: [
+                "Порада: Вимкни V-Sync для кращого FPS!",
+                "Порада: Оновлюй драйвери відеокарти регулярно.",
+                "Порада: Грай у повноекранному режимі для меншої затримки.",
+                "Порада: Уникай перегріву — очищуй кулери.",
+                "Порада: Використовуй швидкість передачі даних PCIe 4.0 для кращої продуктивності.",
+                "Порада: Додай більше оперативної пам'яті для кращої стабільності при високих налаштуваннях графіки.",
+                "Порада: Налаштуй параметри гри для зменшення навантаження на систему."
+            ],
+            en: [
+                "Tip: Disable V-Sync for better FPS!",
+                "Tip: Update your GPU drivers regularly.",
+                "Tip: Play in fullscreen mode for lower input lag.",
+                "Tip: Keep your PC cool to avoid FPS drops.",
+                "Tip: Use PCIe 4.0 data transfer speed for better performance.",
+                "Tip: Add more RAM for better stability at high graphics settings.",
+                "Tip: Adjust game settings to reduce system load."
+            ],
+            pl: [
+                "Wskazówka: Wyłącz V-Sync, aby zwiększyć FPS!",
+                "Wskazówka: Regularnie aktualizuj sterowniki karty graficznej.",
+                "Wskazówka: Graj w trybie pełnoekranowym, aby zmniejszyć opóźnienie.",
+                "Wskazówka: Unikaj przegrzewania — wyczyść wentylatory.",
+                "Wskazówka: Używaj transferu danych PCIe 4.0, aby uzyskać lepszą wydajność.",
+                "Wskazówka: Dodaj więcej pamięci RAM, aby uzyskać lepszą stabilność przy wysokich ustawieniach graficznych.",
+                "Wskazówka: Dostosuj ustawienia gry, aby zmniejszyć obciążenie systemu."
+            ]
+        };
+
+        const translations = {
+            uk: {
+                title: "🔍 FPS Прогноз та Порівняння",
+                cpu: "Процесор:",
+                gpu: "Відеокарта:",
+                game: "Гра:",
+                quality: "Якість графіки:",
+                button: "🎮 Показати FPS"
+            },
+            en: {
+                title: "🔍 FPS Prediction & Comparison",
+                cpu: "CPU:",
+                gpu: "Graphics Card:",
+                game: "Game:",
+                quality: "Graphics Quality:",
+                button: "🎮 Show FPS"
+            },
+            pl: {
+                title: "🔍 Prognoza i Porównanie FPS",
+                cpu: "Procesor:",
+                gpu: "Karta Graficzna:",
+                game: "Gra:",
+                quality: "Jakość grafiki:",
+                button: "🎮 Pokaż FPS"
+            }
+        };
+
+        let currentLang = "uk";
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById("title").textContent = translations[lang].title;
+            document.getElementById("label-cpu").textContent = translations[lang].cpu;
+            document.getElementById("label-gpu").textContent = translations[lang].gpu;
+            document.getElementById("label-game").textContent = translations[lang].game;
+            document.getElementById("label-quality").textContent = translations[lang].quality;
+            document.getElementById("compare-button").textContent = translations[lang].button;
+        }
+
+        function compareComponents() {
+            const cpu = document.getElementById("cpu").value;
+            const gpu = document.getElementById("gpu").value;
+            const game = document.getElementById("game").value;
+            const quality = document.getElementById("quality").value;
+
+            const key = `${cpu}-${gpu}`;
+
+            const fpsData = {
+                Fortnite: {
+                    "i9-12900K-GTX-1650": { "1080p": 160, "2K": 120, "4K": 85 },
+                    "i9-12900K-RTX-3060": { "1080p": 220, "2K": 170, "4K": 130 },
+                    "i9-12900K-RTX-3080": { "1080p": 280, "2K": 220, "4K": 170 },
+                    "i9-12900K-RTX-4090": { "1080p": 350, "2K": 290, "4K": 240 },
+                    "i7-12700K-GTX-1650": { "1080p": 150, "2K": 110, "4K": 80 },
+                    "i7-12700K-RTX-3060": { "1080p": 210, "2K": 160, "4K": 120 },
+                    "i7-12700K-RTX-3080": { "1080p": 270, "2K": 210, "4K": 160 },
+                    "i7-12700K-RTX-4090": { "1080p": 330, "2K": 270, "4K": 220 },
+                    "i5-12600K-GTX-1650": { "1080p": 140, "2K": 100, "4K": 70 },
+                    "i5-12600K-RTX-3060": { "1080p": 200, "2K": 150, "4K": 110 },
+                    "i5-12600K-RTX-3080": { "1080p": 250, "2K": 190, "4K": 140 },
+                    "i5-12600K-RTX-4090": { "1080p": 300, "2K": 240, "4K": 190 },
+                    "i3-12100F-GTX-1650": { "1080p": 130, "2K": 90, "4K": 60 },
+                    "i3-12100F-RTX-3060": { "1080p": 180, "2K": 140, "4K": 100 },
+                    "i3-12100F-RTX-3080": { "1080p": 230, "2K": 180, "4K": 130 },
+                    "i3-12100F-RTX-4090": { "1080p": 280, "2K": 220, "4K": 170 }
+                },
+                CS2: {
+                    "i9-12900K-GTX-1650": { "1080p": 250, "2K": 200, "4K": 150 },
+                    "i9-12900K-RTX-3060": { "1080p": 300, "2K": 240, "4K": 190 },
+                    "i9-12900K-RTX-3080": { "1080p": 380, "2K": 310, "4K": 250 },
+                    "i9-12900K-RTX-4090": { "1080p": 450, "2K": 370, "4K": 300 },
+                    "i7-12700K-GTX-1650": { "1080p": 230, "2K": 180, "4K": 130 },
+                    "i7-12700K-RTX-3060": { "1080p": 280, "2K": 220, "4K": 170 },
+                    "i7-12700K-RTX-3080": { "1080p": 340, "2K": 270, "4K": 210 },
+                    "i7-12700K-RTX-4090": { "1080p": 400, "2K": 320, "4K": 250 },
+                    "i5-12600K-GTX-1650": { "1080p": 210, "2K": 160, "4K": 120 },
+                    "i5-12600K-RTX-3060": { "1080p": 260, "2K": 200, "4K": 150 },
+                    "i5-12600K-RTX-3080": { "1080p": 320, "2K": 250, "4K": 190 },
+                    "i5-12600K-RTX-4090": { "1080p": 380, "2K": 300, "4K": 240 },
+                    "i3-12100F-GTX-1650": { "1080p": 200, "2K": 150, "4K": 110 },
+                    "i3-12100F-RTX-3060": { "1080p": 240, "2K": 180, "4K": 130 },
+                    "i3-12100F-RTX-3080": { "1080p": 290, "2K": 230, "4K": 170 },
+                    "i3-12100F-RTX-4090": { "1080p": 340, "2K": 270, "4K": 210 }
+                },
+                GTA5: {
+                    "i9-12900K-GTX-1650": { "1080p": 140, "2K": 110, "4K": 75 },
+                    "i9-12900K-RTX-3060": { "1080p": 190, "2K": 150, "4K": 110 },
+                    "i9-12900K-RTX-3080": { "1080p": 250, "2K": 200, "4K": 150 },
+                    "i9-12900K-RTX-4090": { "1080p": 320, "2K": 270, "4K": 220 },
+                    "i7-12700K-GTX-1650": { "1080p": 130, "2K": 100, "4K": 70 },
+                    "i7-12700K-RTX-3060": { "1080p": 170, "2K": 130, "4K": 90 },
+                    "i7-12700K-RTX-3080": { "1080p": 220, "2K": 180, "4K": 130 },
+                    "i7-12700K-RTX-4090": { "1080p": 270, "2K": 220, "4K": 170 },
+                    "i5-12600K-GTX-1650": { "1080p": 110, "2K": 80, "4K": 55 },
+                    "i5-12600K-RTX-3060": { "1080p": 150, "2K": 110, "4K": 80 },
+                    "i5-12600K-RTX-3080": { "1080p": 190, "2K": 150, "4K": 100 },
+                    "i5-12600K-RTX-4090": { "1080p": 240, "2K": 190, "4K": 140 },
+                    "i3-12100F-GTX-1650": { "1080p": 100, "2K": 70, "4K": 50 },
+                    "i3-12100F-RTX-3060": { "1080p": 130, "2K": 100, "4K": 70 },
+                    "i3-12100F-RTX-3080": { "1080p": 170, "2K": 130, "4K": 90 },
+                    "i3-12100F-RTX-4090": { "1080p": 210, "2K": 160, "4K": 120 }
+                }
+            };
+
+            const fps = fpsData[game][key][quality];
+
+            document.getElementById("result").innerHTML = `
+                <h2>Прогноз FPS:</h2>
+                <p>Для ${game} на процесорі ${cpu} з відеокартою ${gpu} в якості графіки ${quality}: <strong>${fps} FPS</strong></p>
+                <p class="tip">${tips[currentLang][Math.floor(Math.random() * tips[currentLang].length)]}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
